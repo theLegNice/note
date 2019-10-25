@@ -133,7 +133,7 @@
 
 
 <script type="text/javascript">
-    //定义 对象数组
+    //定义 音乐对象数组
     let musicArr = [
         {simpleScore:1,singName:'do',syllable:'C'},
         {simpleScore:2,singName:'re',syllable:'D'},
@@ -147,13 +147,11 @@
     let randomArr = [];
     musicArr.forEach(function (ele,i) {
         randomArr.push(i)
-
     });
+    //打乱数组 增加更多随机性
     randomArr.shuffle();
 
-    //定义 可能数组 用来赛选另外 两个 不是主要元素
-    let eleNames = ["simpleScore","singName","syllable"];
-
+    //系统对象
     let sysObject = {
         isStart : false,
         count : 0,
@@ -161,8 +159,9 @@
         thisMusic : null
     };
 
+    //  layui 表单元素 刷新页面单选框
     let form;
-    layui.use(['form', 'layedit', 'laydate'], function () {
+    layui.use(['form'], function () {
         form = layui.form;
     });
 
@@ -194,11 +193,7 @@
         //
         // });
 
-        let selectMain = $(".select-main").find("input:checked");
-
-        let index =  Math.floor(Math.random() * selectMain.length);
-
-        showSelectContent($(selectMain[index]).attr("name"));
+        showSelectContent();
     });
 
     //点击提交
@@ -232,7 +227,7 @@
                 time: 800
             },function (alert) {
                 layer.close(alert);
-                showSelectContent("simpleScore");
+                showSelectContent();
             })
         }else {
             layer.alert('错误', {
@@ -240,7 +235,7 @@
             },function(){
                 layer.alert('正确答案: 简谱'+sysObject.thisMusic["simpleScore"]+", 唱名"+sysObject.thisMusic["singName"]+", 音名"+sysObject.thisMusic["syllable"], {icon: 6,btn: ['继续']},function (alert) {
                     layer.close(alert);
-                    showSelectContent("simpleScore");
+                    showSelectContent();
                 });
             });
         }
@@ -253,7 +248,10 @@
     });
 
     //铺 展示选择题的数据 需要传入 主要内容的 音乐对象属性名
-    function showSelectContent(mainEleName) {
+    function showSelectContent() {
+        let selectMain = $(".select-main").find("input:checked");
+        let index =  Math.floor(Math.random() * selectMain.length);
+        let mainEleName = $(selectMain[index]).attr("name")
         if(sysObject.count === sysObject.sumCount){
             layer.msg('题目已经做完,确定重新开始', {
                 time: 20000, //20s后自动关闭
@@ -280,6 +278,9 @@
         let classSuffix = 0;
         //设置展示的名称
         let showName;
+        //定义 可能数组 用来赛选另外 两个 不是主要元素
+        let eleNames = ["simpleScore","singName","syllable"];
+
         $(eleNames).each(function (i,name) {
             if(name === mainEleName){
                 return ;
@@ -316,7 +317,8 @@
         let prop = randomArr.remove(index);
         return musicArr[prop];
     }
-    //随机获取 需要选择的另外3个元素
+
+    //随机获取 需要选择的4个元素
     function getRanDomThreeEleArrays(musicEle) {
         //先获取 所有可能的元素
         let temps = [];
