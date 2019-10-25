@@ -17,3 +17,13 @@ Array.prototype.insert = function (index,ele) {
     }
     this[index] = ele;
 };
+
+Array.prototype.shuffle= function () {
+    for (let i = this.length - 1; i >= 0; i--) {
+        let randomIndex = Math.floor(Math.random() * (i + 1));
+        let itemAtIndex = this[randomIndex];
+        this[randomIndex] = this[i];
+        this[i] = itemAtIndex;
+    }
+
+};
