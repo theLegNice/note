@@ -251,7 +251,6 @@
     //铺 展示选择题的数据 需要传入 主要内容的 音乐对象属性名
     function showSelectContent() {
         let selectMain = $(".select-main").find("input:checked");
-        console.log(selectMain);
         let index =  Math.floor(Math.random() * selectMain.length);
         let mainEleName = $(selectMain[index]).attr("name")
         if (mainEleName === undefined){
