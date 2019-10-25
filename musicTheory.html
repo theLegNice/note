@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+
+<head>
+    <meta charset="utf-8">
+    <title>layer-更懂你的web弹窗解决方案</title>
+    <link rel="stylesheet" href="layui/css/layui.css">
+
+    <script src="js/jquery.min.js"></script>
+    <script src="layui/layui.js"></script>
+
+    <style>
+        body{
+            background-color: #f2f2f2;
+            background:url("images/headphones_minimalism_pastel_122007_2560x1080.jpg");
+        }
+        .box{
+            margin-top: 4%;
+            left: 25%;
+        }
+        .main{
+            background-color: rgb(236, 240, 241);
+            left: 38%;
+            font-size: 180px;
+            text-align: center;
+            height: 200px;
+            line-height: 200px;
+        }
+        .layui-form-label{
+            font-size: 20px;
+            font-weight: 300;
+            padding-left: 30px;
+            width: 60px;
+            text-align: left;
+        }
+        .div-content{
+            height: 200px;
+            font-size: 18px;
+        }
+        .commit-btn{
+            display: block;
+            margin: 0 auto;
+        }
+        .div-start{
+            position: relative;
+        }
+        .start-btn{
+            position: absolute;
+            right: 0;
+        }
+    </style>
+    <script src="utils/ArraysUtil.js"></script>
+
+</head>
+<body>
+
+<form class="layui-form" >
+    <div class="layui-col-xs6 layui-col-md6 box">
+
+        <div class="div-start">
+             <button type="button" class="layui-btn layui-btn-primary layui-btn-lg reset-btn">重置</button>
+             <button type="button" class="layui-btn layui-btn-primary layui-btn-lg start-btn">开始</button>
+        </div>
+
+        <div class="layui-card ">
+
+            <!--标题列表-->
+            <div class="layui-card-header">
+                <div class="layui-col-xs3">
+                    <div class="grid-demo">
+                        计数 : <span class="counter">0</span>
+                    </div>
+                </div>
+<!--                <div class="layui-col-xs3">-->
+<!--                    <div class="grid-demo">-->
+<!--                        用时 : <span>60s</span>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--                <div class="layui-col-xs3">-->
+<!--                    <div class="grid-demo">-->
+<!--                        答对 : <span style="color: #5FB878">1</span>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--                <div class="layui-col-xs3">-->
+<!--                    <div class="grid-demo">-->
+<!--                        答错 : <span style="color: red">1</span>-->
+<!--                    </div>-->
+<!--                </div>-->
+            </div>
+            <!--主要内容-->
+            <div class="layui-card-body div-content">
+                <div class="layui-col-xs3 main">
+                   <div class="grid-demo mainContent">
+
+                    </div>
+                </div>
+            </div>
+            <!--分隔线-->
+            <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+                <legend>选择对应的音符</legend>
+            </fieldset>
+            <!--第一个选择-->
+            <div class="layui-form-item ">
+                <label class="layui-form-label selectTitle1"></label>
+                <div class="layui-input-block selectContent1">
+<!--                    <input type="radio" name="note1" value="fa" title="fa" checked lay-filter="note">-->
+<!--                    <input type="radio" name="note1" value="do" title="do" lay-filter="note">-->
+<!--                    <input type="radio" name="note1" value="mi" title="mi" lay-filter="note">-->
+<!--                    <input type="radio" name="note1" value="la" title="la" lay-filter="note">-->
+                </div>
+            </div>
+            <!--第二个选择-->
+            <div class="layui-form-item ">
+                <label class="layui-form-label selectTitle2"></label>
+                <div class="layui-input-block selectContent2">
+<!--                    <input type="radio" name="note2" value="D" title="D" checked  lay-filter="note">-->
+<!--                    <input type="radio" name="note2" value="B" title="B"  lay-filter="note">-->
+<!--                    <input type="radio" name="note2" value="C" title="C"  lay-filter="note">-->
+<!--                    <input type="radio" name="note2" value="A" title="A"  lay-filter="note">-->
+                </div>
+            </div>
+
+            <!--提交-->
+            <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+                <legend>选择后提交</legend>
+                <div style="height: 60px;">
+                    <button type="button" class="layui-btn layui-btn-primary layui-btn-lg commit-btn">确认</button>
+                </div>
+            </fieldset>
+
+        </div>
+    </div>
+</form>
+
+
+<script type="text/javascript">
+    //定义 对象数组
+    let musicArr = [
+        {simpleScore:1,singName:'do',syllable:'C'},
+        {simpleScore:2,singName:'re',syllable:'D'},
+        {simpleScore:3,singName:'mi',syllable:'E'},
+        {simpleScore:4,singName:'fa',syllable:'F'},
+        {simpleScore:5,singName:'sol',syllable:'G'},
+        {simpleScore:6,singName:'la',syllable:'A'},
+        {simpleScore:7,singName:'si',syllable:'B'},
+    ];
+    //定义数组 来随机获取 musicArr 对象 不重复值
+    let randomArr = [];
+    musicArr.forEach(function (ele,i) {
+        randomArr.push(i)
+
+    });
+
+
+    let sysObject = {
+        isStart : false,
+        count : 0,
+        sumCount : 7,
+        thisMusic : null
+    };
+
+    let form;
+    layui.use(['form', 'layedit', 'laydate'], function () {
+        form= layui.form;
+    });
+
+
+    //点击开始
+    $(".start-btn").click(function () {
+        if(sysObject.isStart){
+            return ;
+        }
+        // layer.msg('请准备,3秒后开始', {
+        //     time: 3000,//2秒关闭（如果不配置，默认是3秒）
+        //     shade: 0.6,
+        //     success: function (layero, index) {
+        //         let msg = layero.text();
+        //         let i = 3;
+        //         let timer = null;
+        //         let fn = function () {
+        //             layero.find(".layui-layer-content").text(msg + '(' + i + ')');
+        //             if (!i) {
+        //                 layer.close(index);
+        //                 clearInterval(timer);
+        //             }
+        //             i--;
+        //         };
+        //         timer = setInterval(fn, 1000);
+        //         fn();
+        //     },
+        // }, function(){
+        //
+        // });
+
+        showSelectContent("simpleScore");
+    });
+    //点击提交
+    $(".commit-btn").click(function () {
+        if (!sysObject.isStart){
+            return;
+        }
+        let selectNote1 = $('input[name="note1"]:checked ');
+        let selectNote2 = $('input[name="note2"]:checked ');
+        if(selectNote1.val() === undefined){
+            layer.msg('请选择'+$('input[name="note1"]').parent().prev().text().substring(0,2));
+            return ;
+        }else if(selectNote2.val() === undefined){
+            layer.msg('请选择'+$('input[name="note2"]').parent().prev().text().substring(0,2));
+            return ;
+        }
+        let status1 = false;
+        let status2 = false;
+
+        if(sysObject.thisMusic[selectNote1.attr("property")] === selectNote1.val()){
+            status1 = true;
+        }
+        if(sysObject.thisMusic[selectNote2.attr("property")] === selectNote2.val()){
+            status2 = true;
+        }
+        if (status1 && status2){
+            layer.alert('正确', {
+                icon: 1,
+            },function (alert) {
+                layer.close(alert);
+                showSelectContent("simpleScore");
+            })
+        }else {
+            layer.alert('错误', {
+                icon: 2,
+            },function(){
+                layer.alert('正确答案: 简谱'+sysObject.thisMusic["simpleScore"]+", 唱名"+sysObject.thisMusic["singName"]+", 音名"+sysObject.thisMusic["syllable"], {icon: 6,btn: ['继续']},function (alert) {
+                    layer.close(alert);
+                    showSelectContent("simpleScore");
+                });
+            });
+        }
+
+    });
+
+    //铺 展示选择题的数据 需要传入 主要内容的 音乐对象属性名
+    function showSelectContent(mainEleName) {
+        if(sysObject.count === sysObject.sumCount){
+            layer.msg('题目已经做完,正在统计本次数据...', {
+                time: 20000, //20s后自动关闭
+                btn: ['确定']
+            });
+            sysObject.count = 0;
+            $(".counter").text(sysObject.count);
+            return ;
+        }
+        sysObject.count++;
+        $(".counter").text(sysObject.count);
+        // 系统状态开始
+        sysObject.isStart = true;
+        //定义 可能数组 用来赛选另外 两个 不是主要元素
+        let eleNames = ["simpleScore","singName","syllable"];
+        //获取 音乐元素
+        let musicEle = getMusicEle();
+        sysObject.thisMusic = musicEle;
+        //把元素内需要展示的内容 注入文本
+        $(".mainContent").text(musicEle[mainEleName]);
+        // 设置选择题class后缀名  1  和 2
+        let classSuffix = 0;
+        //设置展示的名称
+        let showName;
+        $(eleNames).each(function (i,name) {
+            if(name === mainEleName){
+                return ;
+            }
+            if(name === "simpleScore"){
+                showName = "简谱"
+            }else if(name === "singName"){
+                showName = "唱名"
+            } else if(name === "syllable"){
+                showName = "音名"
+            }
+            classSuffix++;
+            let threeEleArrays1 = getRanDomThreeEleArrays(musicEle);
+            let selectRadio1 = "";
+            threeEleArrays1.forEach(function (ele,i) {
+                selectRadio1 += '<input type="radio" name="note'+classSuffix+'" property="'+name+'" value="'+ele[name]+'" title="'+ele[name]+'" lay-filter="note">'
+            });
+            $(".selectTitle"+classSuffix).text(showName+":");
+            $(".selectContent"+classSuffix).empty();
+            $(".selectContent"+classSuffix).append(selectRadio1);
+
+            form.render();
+        });
+
+
+    }
+
+    //随机获取 顺序题目中的 一个元素(不重复)
+    function getMusicEle() {
+        //长度-1 得到 随机数组 的下标 通过下标获取到 对应 长度的随机数
+        let ranNum = randomArr.length - 1;
+        let index =   Math.floor(Math.random() * ranNum);
+        //把获取到的随机下标元素获取musicArr的元素 并删除
+        let prop = randomArr.remove(index);
+        return musicArr[prop];
+    }
+    //随机获取 需要选择的另外3个元素
+    function getRanDomThreeEleArrays(musicEle) {
+        //先获取 所有可能的元素
+        let temps = [];
+        musicArr.forEach(function (i,ele) {
+            temps.push(ele)
+        });
+        let threeEleArrays = [];
+        //循环3次
+        let ranNum = musicArr.length - 1;
+        for (let i = 0; i < 3; i++) {
+            let index =  Math.floor(Math.random() * ranNum);
+            //把获取到的随机下标元素获取musicArr的元素 并删除
+            let prop = temps.remove(index);
+            if(musicArr[prop] === musicEle){
+                i--;
+            }else {
+                threeEleArrays.push(musicArr[prop])
+            }
+            ranNum--;
+        }
+        let index =  Math.floor((Math.random() * 4));
+        threeEleArrays.insert(index,musicEle);
+        return threeEleArrays;
+    }
+
+</script>
+</body>
+</html>
