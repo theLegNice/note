@@ -11,7 +11,8 @@
     <style>
         body{
             background-color: #f2f2f2;
-            background:url("images/headphones_minimalism_pastel_122007_2560x1080.jpg");
+            background:url("images/headphones_minimalism_pastel_122007_2560x1080.jpg")no-repeat;
+            background-size: cover;
         }
         .box{
             margin-top: 4%;
@@ -250,8 +251,16 @@
     //铺 展示选择题的数据 需要传入 主要内容的 音乐对象属性名
     function showSelectContent() {
         let selectMain = $(".select-main").find("input:checked");
+        console.log(selectMain);
         let index =  Math.floor(Math.random() * selectMain.length);
         let mainEleName = $(selectMain[index]).attr("name")
+        if (mainEleName === undefined){
+            layer.msg('请选择出题类型', {
+                time: 2000,
+                btn: ['确定']
+            });
+            return ;
+        }
         if(sysObject.count === sysObject.sumCount){
             layer.msg('题目已经做完,确定重新开始', {
                 time: 20000, //20s后自动关闭
