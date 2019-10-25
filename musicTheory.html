@@ -64,27 +64,27 @@
         <div class="layui-card ">
 
             <!--标题列表-->
-            <div class="layui-card-header">
+            <div class="layui-card-header select-main">
                 <div class="layui-col-xs3">
                     <div class="grid-demo">
                         计数 : <span class="counter">0</span>
                     </div>
                 </div>
-<!--                <div class="layui-col-xs3">-->
-<!--                    <div class="grid-demo">-->
-<!--                        用时 : <span>60s</span>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--                <div class="layui-col-xs3">-->
-<!--                    <div class="grid-demo">-->
-<!--                        答对 : <span style="color: #5FB878">1</span>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--                <div class="layui-col-xs3">-->
-<!--                    <div class="grid-demo">-->
-<!--                        答错 : <span style="color: red">1</span>-->
-<!--                    </div>-->
-<!--                </div>-->
+                <div class="layui-col-xs3">
+                    <div class="grid-demo">
+                        <input type="checkbox" name="simpleScore" title="简谱" checked>
+                    </div>
+                </div>
+                <div class="layui-col-xs3">
+                    <div class="grid-demo">
+                        <input type="checkbox" name="singName" title="唱名">
+                    </div>
+                </div>
+                <div class="layui-col-xs3">
+                    <div class="grid-demo">
+                        <input type="checkbox" name="syllable" title="音名">
+                    </div>
+                </div>
             </div>
             <!--主要内容-->
             <div class="layui-card-body div-content">
@@ -149,7 +149,10 @@
         randomArr.push(i)
 
     });
+    randomArr.shuffle();
 
+    //定义 可能数组 用来赛选另外 两个 不是主要元素
+    let eleNames = ["simpleScore","singName","syllable"];
 
     let sysObject = {
         isStart : false,
@@ -160,7 +163,7 @@
 
     let form;
     layui.use(['form', 'layedit', 'laydate'], function () {
-        form= layui.form;
+        form = layui.form;
     });
 
 
@@ -191,8 +194,13 @@
         //
         // });
 
-        showSelectContent("simpleScore");
+        let selectMain = $(".select-main").find("input:checked");
+
+        let index =  Math.floor(Math.random() * selectMain.length);
+
+        showSelectContent($(selectMain[index]).attr("name"));
     });
+
     //点击提交
     $(".commit-btn").click(function () {
         if (!sysObject.isStart){
@@ -210,15 +218,18 @@
         let status1 = false;
         let status2 = false;
 
-        if(sysObject.thisMusic[selectNote1.attr("property")] === selectNote1.val()){
+
+        if(sysObject.thisMusic[selectNote1.attr("property")].toString() === selectNote1.val().toString()){
             status1 = true;
         }
-        if(sysObject.thisMusic[selectNote2.attr("property")] === selectNote2.val()){
+
+        if(sysObject.thisMusic[selectNote2.attr("property")].toString() === selectNote2.val().toString()){
             status2 = true;
         }
         if (status1 && status2){
-            layer.alert('正确', {
+            layer.msg('正确', {
                 icon: 1,
+                time: 800
             },function (alert) {
                 layer.close(alert);
                 showSelectContent("simpleScore");
@@ -236,14 +247,21 @@
 
     });
 
+    //点击重置
+    $(".reset-btn").click(function () {
+        reset();
+    });
+
     //铺 展示选择题的数据 需要传入 主要内容的 音乐对象属性名
     function showSelectContent(mainEleName) {
         if(sysObject.count === sysObject.sumCount){
-            layer.msg('题目已经做完,正在统计本次数据...', {
+            layer.msg('题目已经做完,确定重新开始', {
                 time: 20000, //20s后自动关闭
                 btn: ['确定']
+            },function () {
+                reset();
             });
-            sysObject.count = 0;
+
             $(".counter").text(sysObject.count);
             return ;
         }
@@ -251,10 +269,10 @@
         $(".counter").text(sysObject.count);
         // 系统状态开始
         sysObject.isStart = true;
-        //定义 可能数组 用来赛选另外 两个 不是主要元素
-        let eleNames = ["simpleScore","singName","syllable"];
+
         //获取 音乐元素
         let musicEle = getMusicEle();
+        console.log(musicEle);
         sysObject.thisMusic = musicEle;
         //把元素内需要展示的内容 注入文本
         $(".mainContent").text(musicEle[mainEleName]);
@@ -324,6 +342,23 @@
         return threeEleArrays;
     }
 
+    //重新开始
+    function reset() {
+        sysObject.isStart = false;
+        randomArr = [];
+        musicArr.forEach(function (ele,i) {
+            randomArr.push(i)
+        });
+        randomArr.shuffle();
+        sysObject.count = 0;
+        $(".counter").text("0");
+        $(".mainContent").text("")
+        $(".selectTitle1").text("");
+        $(".selectTitle2").text("");
+        $(".selectContent1").empty();
+        $(".selectContent2").empty();
+        form.render();
+    }
 </script>
 </body>
 </html>
